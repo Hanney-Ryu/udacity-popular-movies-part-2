@@ -2,13 +2,19 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/action_filter_popular"
+        android:id="@+id/action_filter_watchlist"
+        android:icon="@drawable/ic_bookmark_border_white"
         android:orderInCategory="1"
+        android:title="@string/menu_filter_watchlist"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_filter_popular"
+        android:orderInCategory="2"
         android:title="@string/menu_filter_popular"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_filter_top_rated"
-        android:orderInCategory="2"
+        android:orderInCategory="3"
         android:title="@string/menu_filter_top_rated"
         app:showAsAction="never" />
 </menu>

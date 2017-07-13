@@ -43,8 +43,7 @@ public class QueryUtils {
 
     public static List<Movie> fetchMovieData(String requestUrl) {
         URL url = createUrl(requestUrl);
-        String jsonResponse = null;
-        jsonResponse = makeHttpRequest(url);
+        String jsonResponse = makeHttpRequest(url);
         List<Movie> movies = extractFeatureFromJson(jsonResponse);
 
         return movies;

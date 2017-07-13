@@ -9,20 +9,41 @@ import com.example.android.popularmovie2.util.QueryUtils;
 import java.util.List;
 
 public class MovieLoader extends AsyncTaskLoader<List<Movie>> {
-    String mUrl;
+    private static final String PATH_POPULAR = "popular";
+    private static final String PATH_TOP_RATED = "top_rated";
 
-    public MovieLoader(Context context, String url) {
+    private List<Movie> mMovies;
+    private int mLoaderId = -1;
+    private String mUrl;
+
+    public MovieLoader(Context context, int loaderId) {
         super(context);
-        mUrl = url;
+        mLoaderId = loaderId;
     }
 
     @Override
     protected void onStartLoading() {
-        forceLoad();
+        if (mMovies == null) {
+            forceLoad();
+        } else {
+            deliverResult(mMovies);
+        }
     }
 
     @Override
     public List<Movie> loadInBackground() {
-        return QueryUtils.fetchMovieData(mUrl);
+        switch (mLoaderId) {
+            case MovieListActivity.LOADER_ID_TOP_RATED:
+                mUrl = QueryUtils.makeRequestUrlForMovieList(PATH_TOP_RATED);
+                mMovies = QueryUtils.fetchMovieData(mUrl);
+                break;
+            case MovieListActivity.LOADER_ID_POPULAR:
+                mUrl = QueryUtils.makeRequestUrlForMovieList(PATH_POPULAR);
+                mMovies = QueryUtils.fetchMovieData(mUrl);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown Loader ID : " + mLoaderId);
+        }
+        return mMovies;
     }
 }

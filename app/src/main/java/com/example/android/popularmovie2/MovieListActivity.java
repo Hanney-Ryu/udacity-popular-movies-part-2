@@ -1,6 +1,7 @@
 package com.example.android.popularmovie2;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -16,26 +17,21 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.android.popularmovie2.data.Movie;
-import com.example.android.popularmovie2.util.QueryUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MovieListActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<List<Movie>> {
 
-    private static final String PATH_POPULAR = "popular";
-    private static final String PATH_TOP_RATED = "top_rated";
-
-    private static final int MOVIE_LIST_COLUMN = 2;
-
-    private static final int LOADER_ID_POPULAR = 0;
-    private static final int LOADER_ID_TOP_RATED = 1;
+    private static final int MOVIE_LIST_TOTAL_COLUMN = 2;
+    public static final int LOADER_ID_POPULAR = 0;
+    public static final int LOADER_ID_TOP_RATED = 1;
 
     private ProgressBar mLoadingIndicator;
     private TextView mNoNetworkTextView;
     private TextView mNoResultTextView;
-    private RecyclerView mMovieList;
-    private MovieListAdapter mMoviesListAdapter;
+    private RecyclerView mMovieListRecyclerView;
+    private MovieListAdapter mAdapter;
     private Loader<List<Movie>> mMovieLoader;
 
     @Override
@@ -46,11 +42,11 @@ public class MovieListActivity extends AppCompatActivity implements LoaderManage
         mLoadingIndicator = (ProgressBar) findViewById(R.id.movie_list_loading_indicator);
         mNoNetworkTextView = (TextView) findViewById(R.id.movie_list_no_network_text_view);
         mNoResultTextView = (TextView) findViewById(R.id.movie_list_no_result_text_view);
-        mMovieList = (RecyclerView) findViewById(R.id.movie_list_recycler_view);
-        mMovieList.setLayoutManager(new GridLayoutManager(this, MOVIE_LIST_COLUMN));
-        mMovieList.setHasFixedSize(true);
-        mMoviesListAdapter = new MovieListAdapter(this, new ArrayList<Movie>());
-        mMovieList.setAdapter(mMoviesListAdapter);
+        mMovieListRecyclerView = (RecyclerView) findViewById(R.id.movie_list_recycler_view);
+        mMovieListRecyclerView.setLayoutManager(new GridLayoutManager(this, MOVIE_LIST_TOTAL_COLUMN));
+        mMovieListRecyclerView.setHasFixedSize(true);
+        mAdapter = new MovieListAdapter(this, new ArrayList<Movie>());
+        mMovieListRecyclerView.setAdapter(mAdapter);
 
         if (isConnected()) {
             getSupportLoaderManager().initLoader(LOADER_ID_POPULAR, null, this);
@@ -71,9 +67,15 @@ public class MovieListActivity extends AppCompatActivity implements LoaderManage
         switch (item.getItemId()) {
             case R.id.action_filter_popular:
                 getSupportLoaderManager().restartLoader(LOADER_ID_POPULAR, null, this);
+                setTitle(R.string.movie_list_title_popular);
                 return true;
             case R.id.action_filter_top_rated:
                 getSupportLoaderManager().restartLoader(LOADER_ID_TOP_RATED, null, this);
+                setTitle(R.string.movie_list_title_top_rated);
+                return true;
+            case R.id.action_filter_watchlist:
+                Intent WatchlistIntent = new Intent(this, WatchlistActivity.class);
+                startActivity(WatchlistIntent);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -82,27 +84,21 @@ public class MovieListActivity extends AppCompatActivity implements LoaderManage
 
     @Override
     public Loader<List<Movie>> onCreateLoader(int loaderId, Bundle args) {
-        String pathForFilter = "";
-        switch (loaderId) {
-            case LOADER_ID_TOP_RATED:
-                pathForFilter = PATH_TOP_RATED;
-                break;
-            default:
-                pathForFilter = PATH_POPULAR;
-        }
-        String requestUrlForMovieList = QueryUtils.makeRequestUrlForMovieList(pathForFilter);
-        mMovieLoader = new MovieLoader(this, requestUrlForMovieList);
+        mMovieLoader = new MovieLoader(this, loaderId);
         return mMovieLoader;
     }
 
     @Override
     public void onLoadFinished(Loader<List<Movie>> loader, List<Movie> movies) {
         mLoadingIndicator.setVisibility(View.GONE);
-        if (movies == null || movies.size() == 0) {
+        if (movies.isEmpty()) {
             mNoResultTextView.setVisibility(View.VISIBLE);
+            mMovieListRecyclerView.setVisibility(View.GONE);
         } else {
-            mMoviesListAdapter.updateItems(movies);
+            mNoResultTextView.setVisibility(View.GONE);
+            mMovieListRecyclerView.setVisibility(View.VISIBLE);
         }
+        mAdapter.updateItems(movies);
     }
 
     @Override

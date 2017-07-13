@@ -14,7 +14,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.MovieHolder>{
+public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.MovieHolder> {
 
     private LayoutInflater mLayoutInflater;
     private List<Movie> mMovies;

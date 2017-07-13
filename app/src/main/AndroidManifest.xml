@@ -13,7 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="com.example.android.popularmovie2.MovieListActivity"
+            android:name=".MovieListActivity"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -22,12 +22,25 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.example.android.popularmovie2.MovieDetailActivity"
-            android:parentActivityName="com.example.android.popularmovie2.MovieListActivity">
+            android:name=".WatchlistActivity"
+            android:parentActivityName=".MovieListActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.android.popularmovie2.MovieListActivity" />
         </activity>
+        <activity
+            android:name=".MovieDetailActivity"
+            android:parentActivityName=".MovieListActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.android.popularmovie2.MovieListActivity" />
+        </activity>
+
+        <provider
+            android:name=".data.MovieContentProvider"
+            android:authorities="com.example.android.popularmovie2"
+            android:exported="false" />
+
     </application>
 
 </manifest>
