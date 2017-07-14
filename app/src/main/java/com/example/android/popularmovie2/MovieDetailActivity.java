@@ -9,8 +9,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.popularmovie2.data.Movie;
@@ -33,12 +31,6 @@ public class MovieDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_movie_detail);
 
-        ImageView posterImageView = (ImageView) findViewById(R.id.movie_detail_poster_image);
-        TextView titleTextView = (TextView) findViewById(R.id.movie_detail_title);
-        TextView releaseDateTextView = (TextView) findViewById(R.id.movie_detail_release_date);
-        TextView voteAverageTextView = (TextView) findViewById(R.id.movie_detail_vote_average);
-        TextView overViewTextView = (TextView) findViewById(R.id.movie_detail_overview);
-
         mBinding.actionAddWatchlist.setOnClickListener(new actionAddWatchlistListener());
         mBinding.actionRemoveWatchlist.setOnClickListener(new actionRemoveWatchlistListener());
 
@@ -48,12 +40,12 @@ public class MovieDetailActivity extends AppCompatActivity {
 
         Picasso.with(this)
                 .load(requestUrlForPoster)
-                .into(posterImageView);
+                .into(mBinding.movieDetailPosterImage);
 
-        titleTextView.setText(mCurrentMovie.getTitle());
-        releaseDateTextView.setText(mCurrentMovie.getReleaseDate());
-        voteAverageTextView.setText(mCurrentMovie.getVoteAverage());
-        overViewTextView.setText(mCurrentMovie.getOverview());
+        mBinding.movieDetailTitle.setText(mCurrentMovie.getTitle());
+        mBinding.movieDetailReleaseDate.setText(mCurrentMovie.getReleaseDate());
+        mBinding.movieDetailVoteAverage.setText(mCurrentMovie.getVoteAverage());
+        mBinding.movieDetailOverview.setText(mCurrentMovie.getOverview());
 
         new MovieDetailAsyncTask().execute();
 
