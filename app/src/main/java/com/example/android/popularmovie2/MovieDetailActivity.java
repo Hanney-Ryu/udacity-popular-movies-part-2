@@ -1,6 +1,7 @@
 package com.example.android.popularmovie2;
 
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
 import android.databinding.DataBindingUtil;
 import android.net.Uri;
@@ -17,7 +18,6 @@ import com.example.android.popularmovie2.databinding.ActivityMovieDetailBinding;
 import com.example.android.popularmovie2.util.QueryUtils;
 import com.squareup.picasso.Picasso;
 
-//TODO: feat: trailer
 //TODO: feat: review
 public class MovieDetailActivity extends AppCompatActivity {
     private static final String LOG_TAG = MovieDetailActivity.class.getSimpleName();
@@ -46,7 +46,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         mBinding.movieDetailReleaseDate.setText(mCurrentMovie.getReleaseDate());
         mBinding.movieDetailVoteAverage.setText(mCurrentMovie.getVoteAverage());
         mBinding.movieDetailOverview.setText(mCurrentMovie.getOverview());
-
+        
         new MovieDetailAsyncTask().execute();
 
         setTitle(mCurrentMovie.getTitle());
@@ -92,38 +92,63 @@ public class MovieDetailActivity extends AppCompatActivity {
         }
     }
 
-    private class MovieDetailAsyncTask extends AsyncTask<Void, Void, Integer> {
+    private class MovieDetailAsyncTask extends AsyncTask<Void, Void, Void> {
+        private boolean isWatchList;
+        private String mTrailerUri;
 
         @Override
-        protected Integer doInBackground(Void... params) {
-            Integer countsOfCursor;
-            Cursor cursor = getContentResolver().query(MovieEntry.CONTENT_URI,
-                    null,
-                    MovieEntry.COLUMN_MOVIE_ID + "=?",
-                    new String[]{mCurrentMovie.getId()},
-                    null
-            );
-            countsOfCursor = cursor.getCount();
-            cursor.close();
-            return countsOfCursor;
+        protected Void doInBackground(Void... params) {
+            isWatchList = isWatchList();
+            String requestUrl = QueryUtils.makeRequestUrlForTrailer(mCurrentMovie.getId());
+            mTrailerUri = QueryUtils.fetchTrailerUrl(requestUrl);
+            return null;
         }
 
         @Override
-        protected void onPostExecute(Integer countsOfCursor) {
-            if (countsOfCursor == 0) {
-                makeAddButtonVisible();
-            } else {
+        protected void onPostExecute(Void result) {
+            if (isWatchList) {
                 makeRemoveButtonVisible();
+            } else {
+                makeAddButtonVisible();
             }
+
+            if (mTrailerUri == null) {
+                mBinding.movieDetailTrailerLabel.setVisibility(View.GONE);
+                mBinding.actionSeeTrailer.setVisibility(View.GONE);
+            }
+
+            mBinding.actionSeeTrailer.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mTrailerUri != null) {
+                        Intent youtubeIntent = new Intent(Intent.ACTION_VIEW,
+                                Uri.parse(mTrailerUri));
+                        startActivity(youtubeIntent);
+                    }
+                }
+            });
         }
     }
 
-    private void makeAddButtonVisible(){
+    private boolean isWatchList() {
+        Integer countsOfCursor;
+        Cursor cursor = getContentResolver().query(MovieEntry.CONTENT_URI,
+                null,
+                MovieEntry.COLUMN_MOVIE_ID + "=?",
+                new String[]{mCurrentMovie.getId()},
+                null
+        );
+        countsOfCursor = cursor.getCount();
+        cursor.close();
+        return countsOfCursor > 0;
+    }
+
+    private void makeAddButtonVisible() {
         mBinding.actionAddWatchlist.setVisibility(View.VISIBLE);
         mBinding.actionRemoveWatchlist.setVisibility(View.GONE);
     }
 
-    private void makeRemoveButtonVisible(){
+    private void makeRemoveButtonVisible() {
         mBinding.actionAddWatchlist.setVisibility(View.GONE);
         mBinding.actionRemoveWatchlist.setVisibility(View.VISIBLE);
     }

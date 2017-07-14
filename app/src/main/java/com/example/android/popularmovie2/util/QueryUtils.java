@@ -28,6 +28,16 @@ public class QueryUtils {
     private static final int CONN_READ_TIME = 10000;
     private static final int CONN_CONNECT_TIME = 15000;
 
+    // the movie db
+    private static final String THE_MOVIE_DB_REQUEST_BASE_URL = "https://api.themoviedb.org/3/movie";
+    private static final String THE_MOVIE_DB_IMAGE_REQUEST_BASE_URL = "https://image.tmdb.org/t/p/w185";
+    private static final String THE_MOVIE_DB_TRAILER_REQUEST_BASE_URL = "https://api.themoviedb.org/3/movie";
+
+    private static final String THE_MOVIE_DB_PARAM_API_KEY = "api_key";
+    private static final String THE_MOVIE_DB_API_KEY = BuildConfig.THE_MOVIE_DB_API_KEY;
+    private static final String PATH_VIDEOS = "videos";
+
+    // json key & value : movie list
     private static final String JSON_ARRAY_RESULTS = "results";
     private static final String JSON_KEY_ID = "id";
     private static final String JSON_KEY_TITLE = "title";
@@ -36,17 +46,132 @@ public class QueryUtils {
     private static final String JSON_KEY_OVERVIEW = "overview";
     private static final String JSON_KEY_RELEASE_DATE = "release_date";
 
-    private static final String THE_MOVIE_DB_REQUEST_URL = "https://api.themoviedb.org/3/movie";
-    private static final String PARAM_API_KEY = "api_key";
-    private static final String API_KEY = BuildConfig.THE_MOVIE_DB_API_KEY;
-    private static final String THE_MOVIE_DB_IMAGE_REQUEST_URL = "https://image.tmdb.org/t/p/w185";
+    // json key & value : movie video
+    private static final String JSON_KEY_TYPE = "type";
+    private static final String JSON_VALUE_TRAILER = "Trailer";
+    private static final String JSON_KEY_SITE = "site";
+    private static final String JSON_VALUE_YOUTUBE = "YouTube";
+    private static final String JSON_KEY_KEY = "key";
+
+    // youtube
+    private static final String YOUTUBE_WATCH_VIDEO_BASE_URL = "https://www.youtube.com/watch";
+    private static final String YOUTUBE_PARAM_VIDEO_KEY = "v";
 
     public static List<Movie> fetchMovieData(String requestUrl) {
         URL url = createUrl(requestUrl);
         String jsonResponse = makeHttpRequest(url);
-        List<Movie> movies = extractFeatureFromJson(jsonResponse);
 
+        return extractFeatureFromJson(jsonResponse);
+    }
+
+    private static List<Movie> extractFeatureFromJson(String jsonResponse) {
+        if (TextUtils.isEmpty(jsonResponse)) return null;
+
+        List<Movie> movies = new ArrayList<>();
+        String id = "";
+        String title = "";
+        String voteAverage = "";
+        String posterPath = "";
+        String overview = "";
+        String releaseDate = "";
+
+        try {
+            JSONObject baseJsonResponse = new JSONObject(jsonResponse);
+            if (baseJsonResponse.has(JSON_ARRAY_RESULTS)) {
+                JSONArray results = baseJsonResponse.getJSONArray(JSON_ARRAY_RESULTS);
+                for (int i = 0; i < results.length()
+                        && isEnoughForMovie(results.getJSONObject(i)); i++) {
+                    JSONObject result = results.getJSONObject(i);
+                    id = result.getString(JSON_KEY_ID);
+                    title = result.getString(JSON_KEY_TITLE);
+                    voteAverage = result.getString(JSON_KEY_VOTE_AVERAGE);
+                    posterPath = result.getString(JSON_KEY_POSTER_PATH).substring(1); //remove '/'
+                    overview = result.getString(JSON_KEY_OVERVIEW);
+                    releaseDate = result.getString(JSON_KEY_RELEASE_DATE);
+                    movies.add(new Movie(id, title, voteAverage, posterPath, overview, releaseDate));
+                }
+            } else {
+                Log.i(LOG_TAG, "Not find JSON Object");
+            }
+        } catch (JSONException e) {
+            Log.e(LOG_TAG, "JSON Exception", e);
+            e.printStackTrace();
+        }
         return movies;
+    }
+
+    public static String fetchTrailerUrl(String requestUrl) {
+        URL url = createUrl(requestUrl);
+        String jsonResponse = makeHttpRequest(url);
+        String trailerId = extractTrailerIdFromJson(jsonResponse);
+        return makeYoutubeUrlForTrailer(trailerId);
+    }
+
+    private static String extractTrailerIdFromJson(String jsonResponse) {
+        if (TextUtils.isEmpty(jsonResponse)) return null;
+
+        try {
+            JSONObject baseJsonResponse = new JSONObject(jsonResponse);
+            JSONArray results = baseJsonResponse.getJSONArray(JSON_ARRAY_RESULTS);
+            if (results.length() == 0) {
+                return null;
+            }
+            for (int i = 0; i < results.length(); i++) {
+                JSONObject result = results.getJSONObject(i);
+                if (!isEnoughForTrailer(result)) break;
+                if (result.getString(JSON_KEY_TYPE).equals(JSON_VALUE_TRAILER)
+                        && result.getString(JSON_KEY_SITE).equals(JSON_VALUE_YOUTUBE)) {
+                    return result.getString(JSON_KEY_KEY);
+                }
+            }
+        } catch (JSONException e) {
+            Log.e(LOG_TAG, "JSON Exception", e);
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private static boolean isEnoughForMovie(JSONObject result) {
+        return result.has(JSON_KEY_ID) && result.has(JSON_KEY_TITLE)
+                && result.has(JSON_KEY_VOTE_AVERAGE) && result.has(JSON_KEY_POSTER_PATH)
+                && result.has(JSON_KEY_OVERVIEW) && result.has(JSON_KEY_RELEASE_DATE);
+    }
+
+    private static boolean isEnoughForTrailer(JSONObject result) {
+        return result.has(JSON_KEY_TYPE) && result.has(JSON_KEY_SITE)
+                && result.has(JSON_KEY_SITE);
+    }
+
+    public static String makeRequestUrlForTrailer(String movieId) {
+        Uri.Builder uriBuilder = Uri.parse(THE_MOVIE_DB_TRAILER_REQUEST_BASE_URL)
+                .buildUpon()
+                .appendPath(movieId)
+                .appendPath(PATH_VIDEOS)
+                .appendQueryParameter(THE_MOVIE_DB_PARAM_API_KEY, THE_MOVIE_DB_API_KEY);
+        return uriBuilder.toString();
+    }
+
+    private static String makeYoutubeUrlForTrailer(String trailerId) {
+        if (trailerId == null) return null;
+        Uri.Builder uriBuilder = Uri.parse(YOUTUBE_WATCH_VIDEO_BASE_URL)
+                .buildUpon()
+                .appendQueryParameter(YOUTUBE_PARAM_VIDEO_KEY, trailerId);
+        return uriBuilder.toString();
+    }
+
+    public static String makeRequestUrlForMovieList(String pathForFilter) {
+        Uri.Builder uriBuilder = Uri.parse(THE_MOVIE_DB_REQUEST_BASE_URL)
+                .buildUpon()
+                .appendPath(pathForFilter)
+                .appendQueryParameter(THE_MOVIE_DB_PARAM_API_KEY, THE_MOVIE_DB_API_KEY);
+        return uriBuilder.toString();
+    }
+
+    public static String makeRequestUrlForPoster(String posterPath) {
+        Uri.Builder uriBuilder = Uri.parse(THE_MOVIE_DB_IMAGE_REQUEST_BASE_URL)
+                .buildUpon()
+                .appendPath(posterPath);
+        return uriBuilder.toString();
     }
 
     private static URL createUrl(String requestUrl) {
@@ -114,62 +239,5 @@ public class QueryUtils {
             }
         }
         return output.toString();
-    }
-
-    private static List<Movie> extractFeatureFromJson(String jsonResponse) {
-        if (TextUtils.isEmpty(jsonResponse)) return null;
-
-        List<Movie> movies = new ArrayList<>();
-        String id = "";
-        String title = "";
-        String voteAverage = "";
-        String posterPath = "";
-        String overview = "";
-        String releaseDate = "";
-
-        try {
-            JSONObject baseJsonResponse = new JSONObject(jsonResponse);
-            if (baseJsonResponse.has(JSON_ARRAY_RESULTS)) {
-                JSONArray results = baseJsonResponse.getJSONArray(JSON_ARRAY_RESULTS);
-                for (int i = 0; i < results.length()
-                        && hasAllElements(results.getJSONObject(i)); i++) {
-                    JSONObject result = results.getJSONObject(i);
-                    id = result.getString(JSON_KEY_ID);
-                    title = result.getString(JSON_KEY_TITLE);
-                    voteAverage = result.getString(JSON_KEY_VOTE_AVERAGE);
-                    posterPath = result.getString(JSON_KEY_POSTER_PATH).substring(1); //remove '/'
-                    overview = result.getString(JSON_KEY_OVERVIEW);
-                    releaseDate = result.getString(JSON_KEY_RELEASE_DATE);
-                    movies.add(new Movie(id, title, voteAverage, posterPath, overview, releaseDate));
-                }
-            } else {
-                Log.i(LOG_TAG, "Not find JSON Object");
-            }
-        } catch (JSONException e) {
-            Log.e(LOG_TAG, "JSON Exception", e);
-            e.printStackTrace();
-        }
-        return movies;
-    }
-
-    private static boolean hasAllElements(JSONObject result) {
-        return result.has(JSON_KEY_ID) && result.has(JSON_KEY_TITLE)
-                && result.has(JSON_KEY_VOTE_AVERAGE) && result.has(JSON_KEY_POSTER_PATH)
-                && result.has(JSON_KEY_OVERVIEW) && result.has(JSON_KEY_RELEASE_DATE);
-    }
-
-    public static String makeRequestUrlForMovieList(String pathForFilter) {
-        Uri.Builder uriBuilder = Uri.parse(THE_MOVIE_DB_REQUEST_URL)
-                .buildUpon()
-                .appendPath(pathForFilter)
-                .appendQueryParameter(PARAM_API_KEY, API_KEY);
-        return uriBuilder.toString();
-    }
-
-    public static String makeRequestUrlForPoster(String posterPath) {
-        Uri.Builder uriBuilder = Uri.parse(THE_MOVIE_DB_IMAGE_REQUEST_URL)
-                .buildUpon()
-                .appendPath(posterPath);
-        return uriBuilder.toString();
     }
 }
