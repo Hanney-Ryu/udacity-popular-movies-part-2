@@ -85,8 +85,6 @@ public class WatchlistActivity extends AppCompatActivity implements LoaderManage
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mAdapter.swapCursor(data);
-
-        mBinding.movieListLoadingIndicator.setVisibility(View.GONE);
         if (data.getCount() == 0) {
             mBinding.movieListNoResultTextView.setVisibility(View.VISIBLE);
             mBinding.movieListRecyclerView.setVisibility(View.GONE);
@@ -94,6 +92,7 @@ public class WatchlistActivity extends AppCompatActivity implements LoaderManage
             mBinding.movieListNoResultTextView.setVisibility(View.GONE);
             mBinding.movieListRecyclerView.setVisibility(View.VISIBLE);
         }
+        mBinding.movieListLoadingIndicatorFrame.setVisibility(View.GONE);
     }
 
     @Override

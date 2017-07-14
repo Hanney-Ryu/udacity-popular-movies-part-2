@@ -44,7 +44,7 @@ public class MovieListActivity extends AppCompatActivity implements LoaderManage
         if (isConnected()) {
             getSupportLoaderManager().initLoader(LOADER_ID_POPULAR, null, this);
         } else {
-            mBinding.movieListLoadingIndicator.setVisibility(View.GONE);
+            mBinding.movieListLoadingIndicatorFrame.setVisibility(View.GONE);
             mBinding.movieListNoNetworkTextView.setVisibility(View.VISIBLE);
         }
     }
@@ -83,7 +83,6 @@ public class MovieListActivity extends AppCompatActivity implements LoaderManage
 
     @Override
     public void onLoadFinished(Loader<List<Movie>> loader, List<Movie> movies) {
-        mBinding.movieListLoadingIndicator.setVisibility(View.GONE);
         if (movies.isEmpty()) {
             mBinding.movieListNoResultTextView.setVisibility(View.VISIBLE);
             mBinding.movieListRecyclerView.setVisibility(View.GONE);
@@ -92,6 +91,7 @@ public class MovieListActivity extends AppCompatActivity implements LoaderManage
             mBinding.movieListRecyclerView.setVisibility(View.VISIBLE);
         }
         mAdapter.updateItems(movies);
+        mBinding.movieListLoadingIndicatorFrame.setVisibility(View.GONE);
     }
 
     @Override

@@ -7,12 +7,18 @@
         android:layout_height="match_parent"
         tools:context="com.example.android.popularmovie2.MovieListActivity">
 
-        <ProgressBar
-            android:id="@+id/movie_list_loading_indicator"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:indeterminate="false" />
+        <FrameLayout
+            android:id="@+id/movie_list_loading_indicator_frame"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:indeterminate="false" />
+
+        </FrameLayout>
 
         <TextView
             android:id="@+id/movie_list_no_result_text_view"
