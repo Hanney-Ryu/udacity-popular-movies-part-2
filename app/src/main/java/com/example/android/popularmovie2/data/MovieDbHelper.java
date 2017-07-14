@@ -1,12 +1,10 @@
 package com.example.android.popularmovie2.data;
 
-
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.example.android.popularmovie2.data.MovieContract.MovieEntry;
-
 
 public class MovieDbHelper extends SQLiteOpenHelper{
     private static final String DATABASE_NAME = "moviesDb.db";
@@ -26,7 +24,6 @@ public class MovieDbHelper extends SQLiteOpenHelper{
                 MovieEntry.COLUMN_RELEASE_DATE + " TEXT, " +
                 MovieEntry.COLUMN_TIMESTAMP + " DEFAULT CURRENT_TIMESTAMP NOT NULL);";
         db.execSQL(CREATE_TABLE);
-
     }
 
     @Override

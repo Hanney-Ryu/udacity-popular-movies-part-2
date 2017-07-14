@@ -8,21 +8,24 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import com.example.android.popularmovie2.data.Movie;
 import com.example.android.popularmovie2.data.MovieContract.MovieEntry;
+import com.example.android.popularmovie2.data.Review;
 import com.example.android.popularmovie2.databinding.ActivityMovieDetailBinding;
 import com.example.android.popularmovie2.util.QueryUtils;
 import com.squareup.picasso.Picasso;
 
-//TODO: feat: review
+import java.util.ArrayList;
+import java.util.List;
+
 public class MovieDetailActivity extends AppCompatActivity {
-    private static final String LOG_TAG = MovieDetailActivity.class.getSimpleName();
 
     Movie mCurrentMovie;
+    ReviewAdapter mAdapter;
 
     ActivityMovieDetailBinding mBinding;
 
@@ -30,6 +33,9 @@ public class MovieDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_movie_detail);
+        mAdapter = new ReviewAdapter(this, new ArrayList<Review>());
+        mBinding.movieDetailReviewRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mBinding.movieDetailReviewRecyclerView.setAdapter(mAdapter);
 
         mBinding.actionAddWatchlist.setOnClickListener(new actionAddWatchlistListener());
         mBinding.actionRemoveWatchlist.setOnClickListener(new actionRemoveWatchlistListener());
@@ -46,7 +52,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         mBinding.movieDetailReleaseDate.setText(mCurrentMovie.getReleaseDate());
         mBinding.movieDetailVoteAverage.setText(mCurrentMovie.getVoteAverage());
         mBinding.movieDetailOverview.setText(mCurrentMovie.getOverview());
-        
+
         new MovieDetailAsyncTask().execute();
 
         setTitle(mCurrentMovie.getTitle());
@@ -64,9 +70,6 @@ public class MovieDetailActivity extends AppCompatActivity {
             contentValues.put(MovieEntry.COLUMN_RELEASE_DATE, mCurrentMovie.getReleaseDate());
 
             Uri uri = getContentResolver().insert(MovieEntry.CONTENT_URI, contentValues);
-            if (uri != null) {
-                Toast.makeText(getBaseContext(), uri.toString(), Toast.LENGTH_SHORT).show();
-            }
             makeRemoveButtonVisible();
         }
     }
@@ -95,12 +98,18 @@ public class MovieDetailActivity extends AppCompatActivity {
     private class MovieDetailAsyncTask extends AsyncTask<Void, Void, Void> {
         private boolean isWatchList;
         private String mTrailerUri;
+        private List<Review> mReviews;
 
         @Override
         protected Void doInBackground(Void... params) {
             isWatchList = isWatchList();
-            String requestUrl = QueryUtils.makeRequestUrlForTrailer(mCurrentMovie.getId());
-            mTrailerUri = QueryUtils.fetchTrailerUrl(requestUrl);
+
+            String requestUrlForReviews = QueryUtils.makeRequestUrlForReviews(mCurrentMovie.getId());
+            mReviews = QueryUtils.fetchReviewData(requestUrlForReviews);
+
+            String requestUrlForTrailer = QueryUtils.makeRequestUrlForTrailer(mCurrentMovie.getId());
+            mTrailerUri = QueryUtils.fetchTrailerUrl(requestUrlForTrailer);
+
             return null;
         }
 
@@ -112,10 +121,19 @@ public class MovieDetailActivity extends AppCompatActivity {
                 makeAddButtonVisible();
             }
 
+            if (mReviews == null || mReviews.isEmpty()) {
+                mBinding.movieDetailReviewLabel.setVisibility(View.GONE);
+            } else {
+                mBinding.movieDetailReviewLabel.setVisibility(View.VISIBLE);
+                mAdapter.updateItems(mReviews);
+            }
+
             if (mTrailerUri == null) {
                 mBinding.movieDetailTrailerLabel.setVisibility(View.GONE);
                 mBinding.actionSeeTrailer.setVisibility(View.GONE);
             }
+
+            mBinding.movieDetailLoadingIndicatorFrame.setVisibility(View.GONE);
 
             mBinding.actionSeeTrailer.setOnClickListener(new View.OnClickListener() {
                 @Override

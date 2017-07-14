@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.example.android.popularmovie2.BuildConfig;
 import com.example.android.popularmovie2.data.Movie;
+import com.example.android.popularmovie2.data.Review;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,6 +37,7 @@ public class QueryUtils {
     private static final String THE_MOVIE_DB_PARAM_API_KEY = "api_key";
     private static final String THE_MOVIE_DB_API_KEY = BuildConfig.THE_MOVIE_DB_API_KEY;
     private static final String PATH_VIDEOS = "videos";
+    private static final String PATH_REVIEWS = "reviews";
 
     // json key & value : movie list
     private static final String JSON_ARRAY_RESULTS = "results";
@@ -45,6 +47,10 @@ public class QueryUtils {
     private static final String JSON_KEY_POSTER_PATH = "poster_path";
     private static final String JSON_KEY_OVERVIEW = "overview";
     private static final String JSON_KEY_RELEASE_DATE = "release_date";
+
+    // json key & value : movie review
+    private static final String JSON_KEY_AUTHOR = "author";
+    private static final String JSON_KEY_CONTENT = "content";
 
     // json key & value : movie video
     private static final String JSON_KEY_TYPE = "type";
@@ -61,10 +67,10 @@ public class QueryUtils {
         URL url = createUrl(requestUrl);
         String jsonResponse = makeHttpRequest(url);
 
-        return extractFeatureFromJson(jsonResponse);
+        return extractMovieListFromJson(jsonResponse);
     }
 
-    private static List<Movie> extractFeatureFromJson(String jsonResponse) {
+    private static List<Movie> extractMovieListFromJson(String jsonResponse) {
         if (TextUtils.isEmpty(jsonResponse)) return null;
 
         List<Movie> movies = new ArrayList<>();
@@ -79,9 +85,9 @@ public class QueryUtils {
             JSONObject baseJsonResponse = new JSONObject(jsonResponse);
             if (baseJsonResponse.has(JSON_ARRAY_RESULTS)) {
                 JSONArray results = baseJsonResponse.getJSONArray(JSON_ARRAY_RESULTS);
-                for (int i = 0; i < results.length()
-                        && isEnoughForMovie(results.getJSONObject(i)); i++) {
+                for (int i = 0; i < results.length(); i++) {
                     JSONObject result = results.getJSONObject(i);
+                    if (!isEnoughForMovie(result)) break;
                     id = result.getString(JSON_KEY_ID);
                     title = result.getString(JSON_KEY_TITLE);
                     voteAverage = result.getString(JSON_KEY_VOTE_AVERAGE);
@@ -98,6 +104,42 @@ public class QueryUtils {
             e.printStackTrace();
         }
         return movies;
+    }
+
+    public static List<Review> fetchReviewData(String requestUrl) {
+        URL url = createUrl(requestUrl);
+        String jsonResponse = makeHttpRequest(url);
+        return extractReviewsFromJson(jsonResponse);
+    }
+
+    private static List<Review> extractReviewsFromJson(String jsonResponse) {
+        if (TextUtils.isEmpty(jsonResponse)) return null;
+        List<Review> reviews = new ArrayList<>();
+        String id = "";
+        String author = "";
+        String content = "";
+
+        try {
+            JSONObject baseJsonResponse = new JSONObject(jsonResponse);
+            JSONArray results = baseJsonResponse.getJSONArray(JSON_ARRAY_RESULTS);
+            if (results.length() == 0) {
+                return null;
+            }
+            for (int i = 0; i < results.length(); i++) {
+                JSONObject result = results.getJSONObject(i);
+                if (!isEnoughForReview(result)) break;
+                id = result.getString(JSON_KEY_ID);
+                author = result.getString(JSON_KEY_AUTHOR);
+                content = result.getString(JSON_KEY_CONTENT);
+                Review review = new Review(id, author, content);
+                reviews.add(review);
+            }
+        } catch (JSONException e) {
+            Log.e(LOG_TAG, "JSON Exception", e);
+            e.printStackTrace();
+        }
+
+        return reviews;
     }
 
     public static String fetchTrailerUrl(String requestUrl) {
@@ -137,9 +179,23 @@ public class QueryUtils {
                 && result.has(JSON_KEY_OVERVIEW) && result.has(JSON_KEY_RELEASE_DATE);
     }
 
+    private static boolean isEnoughForReview(JSONObject result) {
+        return result.has(JSON_KEY_ID) && result.has(JSON_KEY_AUTHOR)
+                && result.has(JSON_KEY_CONTENT);
+    }
+
     private static boolean isEnoughForTrailer(JSONObject result) {
         return result.has(JSON_KEY_TYPE) && result.has(JSON_KEY_SITE)
                 && result.has(JSON_KEY_SITE);
+    }
+
+    public static String makeRequestUrlForReviews(String movieId) {
+        Uri.Builder uriBuilder = Uri.parse(THE_MOVIE_DB_TRAILER_REQUEST_BASE_URL)
+                .buildUpon()
+                .appendPath(movieId)
+                .appendPath(PATH_REVIEWS)
+                .appendQueryParameter(THE_MOVIE_DB_PARAM_API_KEY, THE_MOVIE_DB_API_KEY);
+        return uriBuilder.toString();
     }
 
     public static String makeRequestUrlForTrailer(String movieId) {

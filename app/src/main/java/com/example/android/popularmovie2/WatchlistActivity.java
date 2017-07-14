@@ -14,8 +14,6 @@ import android.view.View;
 import com.example.android.popularmovie2.data.MovieContract.MovieEntry;
 import com.example.android.popularmovie2.databinding.ActivityMovieListBinding;
 
-import java.util.ArrayList;
-
 public class WatchlistActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private final String LOG_TAG = WatchlistActivity.class.getSimpleName();

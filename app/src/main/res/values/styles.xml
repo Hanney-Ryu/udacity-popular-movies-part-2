@@ -6,11 +6,15 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="MovieDetailLabel">
+    <style name="MediumTextView">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:textAppearance">?android:textAppearanceMedium</item>
         <item name="android:layout_marginTop">@dimen/margin_large</item>
+        <item name="android:textAppearance">?android:textAppearanceMedium</item>
+    </style>
+
+    <style name="MovieDetailLabel" parent="@style/MediumTextView">
+        <item name="android:textStyle">bold</item>
     </style>
 
     <style name="WatchlistButton">
