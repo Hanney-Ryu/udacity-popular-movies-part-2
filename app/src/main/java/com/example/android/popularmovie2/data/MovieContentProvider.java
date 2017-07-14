@@ -64,8 +64,7 @@ public class MovieContentProvider extends ContentProvider {
 
     @Override
     public String getType(@NonNull Uri uri) {
-        //TODO : implement getType method in content provider
-        return null;
+        throw new UnsupportedOperationException("getType method is not supported now");
     }
 
     @Override
@@ -93,7 +92,6 @@ public class MovieContentProvider extends ContentProvider {
     @Override
     public int delete(@NonNull Uri uri, @Nullable String selection,
                       @Nullable String[] selectionArgs) {
-        //TODO : implement delete method in content provider
         final SQLiteDatabase db = mMovieDbHelper.getWritableDatabase();
         int favoriteDeleted;
 
@@ -119,7 +117,6 @@ public class MovieContentProvider extends ContentProvider {
     @Override
     public int update(@NonNull Uri uri, @Nullable ContentValues values, @Nullable String selection,
                       @Nullable String[] selectionArgs) {
-        //TODO : implement update method in content provider
-        return 0;
+        throw new UnsupportedOperationException("Updated method is not supported now");
     }
 }
