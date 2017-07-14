@@ -2,19 +2,20 @@ package com.example.android.popularmovie2;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.databinding.DataBindingUtil;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.popularmovie2.data.Movie;
 import com.example.android.popularmovie2.data.MovieContract.MovieEntry;
+import com.example.android.popularmovie2.databinding.ActivityMovieDetailBinding;
 import com.example.android.popularmovie2.util.QueryUtils;
 import com.squareup.picasso.Picasso;
 
@@ -22,14 +23,15 @@ import com.squareup.picasso.Picasso;
 //TODO: feat: review
 public class MovieDetailActivity extends AppCompatActivity {
     private static final String LOG_TAG = MovieDetailActivity.class.getSimpleName();
-    Button mAddToWatchlistButton;
-    Button mRemoveFromWatchlistButton;
+
     Movie mCurrentMovie;
+
+    ActivityMovieDetailBinding mBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_movie_detail);
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_movie_detail);
 
         ImageView posterImageView = (ImageView) findViewById(R.id.movie_detail_poster_image);
         TextView titleTextView = (TextView) findViewById(R.id.movie_detail_title);
@@ -37,11 +39,8 @@ public class MovieDetailActivity extends AppCompatActivity {
         TextView voteAverageTextView = (TextView) findViewById(R.id.movie_detail_vote_average);
         TextView overViewTextView = (TextView) findViewById(R.id.movie_detail_overview);
 
-        mAddToWatchlistButton = (Button) findViewById(R.id.action_add_watchlist);
-        mRemoveFromWatchlistButton = (Button) findViewById(R.id.action_remove_watchlist);
-
-        mAddToWatchlistButton.setOnClickListener(new actionAddWatchlistListener());
-        mRemoveFromWatchlistButton.setOnClickListener(new actionRemoveWatchlistListener());
+        mBinding.actionAddWatchlist.setOnClickListener(new actionAddWatchlistListener());
+        mBinding.actionRemoveWatchlist.setOnClickListener(new actionRemoveWatchlistListener());
 
         mCurrentMovie = getIntent().getExtras().getParcelable(Movie.class.getSimpleName());
 
@@ -128,12 +127,12 @@ public class MovieDetailActivity extends AppCompatActivity {
     }
 
     private void makeAddButtonVisible(){
-        mAddToWatchlistButton.setVisibility(View.VISIBLE);
-        mRemoveFromWatchlistButton.setVisibility(View.GONE);
+        mBinding.actionAddWatchlist.setVisibility(View.VISIBLE);
+        mBinding.actionRemoveWatchlist.setVisibility(View.GONE);
     }
 
     private void makeRemoveButtonVisible(){
-        mAddToWatchlistButton.setVisibility(View.GONE);
-        mRemoveFromWatchlistButton.setVisibility(View.VISIBLE);
+        mBinding.actionAddWatchlist.setVisibility(View.GONE);
+        mBinding.actionRemoveWatchlist.setVisibility(View.VISIBLE);
     }
 }

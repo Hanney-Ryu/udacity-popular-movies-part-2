@@ -2,6 +2,7 @@ package com.example.android.popularmovie2;
 
 import android.content.Context;
 import android.content.Intent;
+import android.databinding.DataBindingUtil;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -9,14 +10,12 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import com.example.android.popularmovie2.data.Movie;
+import com.example.android.popularmovie2.databinding.ActivityMovieListBinding;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,32 +26,26 @@ public class MovieListActivity extends AppCompatActivity implements LoaderManage
     public static final int LOADER_ID_POPULAR = 0;
     public static final int LOADER_ID_TOP_RATED = 1;
 
-    private ProgressBar mLoadingIndicator;
-    private TextView mNoNetworkTextView;
-    private TextView mNoResultTextView;
-    private RecyclerView mMovieListRecyclerView;
     private MovieListAdapter mAdapter;
     private Loader<List<Movie>> mMovieLoader;
+
+    private ActivityMovieListBinding mBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_movie_list);
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_movie_list);
 
-        mLoadingIndicator = (ProgressBar) findViewById(R.id.movie_list_loading_indicator);
-        mNoNetworkTextView = (TextView) findViewById(R.id.movie_list_no_network_text_view);
-        mNoResultTextView = (TextView) findViewById(R.id.movie_list_no_result_text_view);
-        mMovieListRecyclerView = (RecyclerView) findViewById(R.id.movie_list_recycler_view);
-        mMovieListRecyclerView.setLayoutManager(new GridLayoutManager(this, MOVIE_LIST_TOTAL_COLUMN));
-        mMovieListRecyclerView.setHasFixedSize(true);
+        mBinding.movieListRecyclerView.setLayoutManager(new GridLayoutManager(this, MOVIE_LIST_TOTAL_COLUMN));
+        mBinding.movieListRecyclerView.setHasFixedSize(true);
         mAdapter = new MovieListAdapter(this, new ArrayList<Movie>());
-        mMovieListRecyclerView.setAdapter(mAdapter);
+        mBinding.movieListRecyclerView.setAdapter(mAdapter);
 
         if (isConnected()) {
             getSupportLoaderManager().initLoader(LOADER_ID_POPULAR, null, this);
         } else {
-            mLoadingIndicator.setVisibility(View.GONE);
-            mNoNetworkTextView.setVisibility(View.VISIBLE);
+            mBinding.movieListLoadingIndicator.setVisibility(View.GONE);
+            mBinding.movieListNoNetworkTextView.setVisibility(View.VISIBLE);
         }
     }
 
@@ -90,13 +83,13 @@ public class MovieListActivity extends AppCompatActivity implements LoaderManage
 
     @Override
     public void onLoadFinished(Loader<List<Movie>> loader, List<Movie> movies) {
-        mLoadingIndicator.setVisibility(View.GONE);
+        mBinding.movieListLoadingIndicator.setVisibility(View.GONE);
         if (movies.isEmpty()) {
-            mNoResultTextView.setVisibility(View.VISIBLE);
-            mMovieListRecyclerView.setVisibility(View.GONE);
+            mBinding.movieListNoResultTextView.setVisibility(View.VISIBLE);
+            mBinding.movieListRecyclerView.setVisibility(View.GONE);
         } else {
-            mNoResultTextView.setVisibility(View.GONE);
-            mMovieListRecyclerView.setVisibility(View.VISIBLE);
+            mBinding.movieListNoResultTextView.setVisibility(View.GONE);
+            mBinding.movieListRecyclerView.setVisibility(View.VISIBLE);
         }
         mAdapter.updateItems(movies);
     }

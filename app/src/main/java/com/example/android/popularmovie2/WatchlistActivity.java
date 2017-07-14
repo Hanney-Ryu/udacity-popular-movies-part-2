@@ -1,20 +1,18 @@
 package com.example.android.popularmovie2;
 
 import android.database.Cursor;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
-import com.example.android.popularmovie2.data.Movie;
 import com.example.android.popularmovie2.data.MovieContract.MovieEntry;
+import com.example.android.popularmovie2.databinding.ActivityMovieListBinding;
 
 import java.util.ArrayList;
 
@@ -25,24 +23,20 @@ public class WatchlistActivity extends AppCompatActivity implements LoaderManage
     private static final int MOVIE_LIST_TOTAL_COLUMN = 2;
     private static final int WATCHLIST_LOADER_ID = 2;
 
-    private ProgressBar mLoadingIndicator;
-    private TextView mNoResultTextView;
-    private RecyclerView mMovieListRecyclerView;
     private WatchlistAdapter mAdapter;
+
+    private ActivityMovieListBinding mBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_movie_list);
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_movie_list);
         setTitle(getString(R.string.watchlist_title));
 
-        mLoadingIndicator = (ProgressBar) findViewById(R.id.movie_list_loading_indicator);
-        mNoResultTextView = (TextView) findViewById(R.id.movie_list_no_result_text_view);
-        mMovieListRecyclerView = (RecyclerView) findViewById(R.id.movie_list_recycler_view);
-        mMovieListRecyclerView.setLayoutManager(new GridLayoutManager(this, MOVIE_LIST_TOTAL_COLUMN));
-        mMovieListRecyclerView.setHasFixedSize(true);
+        mBinding.movieListRecyclerView.setLayoutManager(new GridLayoutManager(this, MOVIE_LIST_TOTAL_COLUMN));
+        mBinding.movieListRecyclerView.setHasFixedSize(true);
         mAdapter = new WatchlistAdapter(this);
-        mMovieListRecyclerView.setAdapter(mAdapter);
+        mBinding.movieListRecyclerView.setAdapter(mAdapter);
 
         getSupportLoaderManager().initLoader(WATCHLIST_LOADER_ID, null, this);
     }
@@ -94,13 +88,13 @@ public class WatchlistActivity extends AppCompatActivity implements LoaderManage
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mAdapter.swapCursor(data);
 
-        mLoadingIndicator.setVisibility(View.GONE);
+        mBinding.movieListLoadingIndicator.setVisibility(View.GONE);
         if (data.getCount() == 0) {
-            mNoResultTextView.setVisibility(View.VISIBLE);
-            mMovieListRecyclerView.setVisibility(View.GONE);
+            mBinding.movieListNoResultTextView.setVisibility(View.VISIBLE);
+            mBinding.movieListRecyclerView.setVisibility(View.GONE);
         } else {
-            mNoResultTextView.setVisibility(View.GONE);
-            mMovieListRecyclerView.setVisibility(View.VISIBLE);
+            mBinding.movieListNoResultTextView.setVisibility(View.GONE);
+            mBinding.movieListRecyclerView.setVisibility(View.VISIBLE);
         }
     }
 

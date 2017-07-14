@@ -9,6 +9,7 @@ import com.example.android.popularmovie2.util.QueryUtils;
 import java.util.List;
 
 public class MovieLoader extends AsyncTaskLoader<List<Movie>> {
+
     private static final String PATH_POPULAR = "popular";
     private static final String PATH_TOP_RATED = "top_rated";
 
