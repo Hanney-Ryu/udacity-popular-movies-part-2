@@ -60,11 +60,11 @@ public class MovieListActivity extends AppCompatActivity implements LoaderManage
         switch (item.getItemId()) {
             case R.id.action_filter_popular:
                 getSupportLoaderManager().restartLoader(LOADER_ID_POPULAR, null, this);
-                setTitle(R.string.movie_list_title_popular);
+                setTitle(R.string.popular_title);
                 return true;
             case R.id.action_filter_top_rated:
                 getSupportLoaderManager().restartLoader(LOADER_ID_TOP_RATED, null, this);
-                setTitle(R.string.movie_list_title_top_rated);
+                setTitle(R.string.top_rated_title);
                 return true;
             case R.id.action_filter_watchlist:
                 Intent WatchlistIntent = new Intent(this, WatchlistActivity.class);

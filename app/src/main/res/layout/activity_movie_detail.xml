@@ -5,7 +5,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_margin="16dp"
+        android:layout_margin="@dimen/margin_large"
         android:orientation="vertical">
 
         <LinearLayout
@@ -48,25 +48,15 @@
 
                 <Button
                     android:id="@+id/action_add_watchlist"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:layout_marginTop="4dp"
+                    style="@style/WatchlistButton"
                     android:background="@color/colorAccent"
-                    android:paddingLeft="16dp"
-                    android:paddingRight="16dp"
-                    android:scaleType="centerInside"
                     android:text="@string/movie_detail_add_watchlist"
                     android:visibility="gone" />
 
                 <Button
                     android:id="@+id/action_remove_watchlist"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:layout_marginTop="4dp"
+                    style="@style/WatchlistButton"
                     android:background="@android:color/darker_gray"
-                    android:paddingLeft="16dp"
-                    android:paddingRight="16dp"
-                    android:scaleType="centerInside"
                     android:text="@string/movie_detail_remove_watchlist"
                     android:visibility="gone" />
 
@@ -75,10 +65,26 @@
 
         <TextView
             android:id="@+id/movie_detail_overview"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:textAppearance="?android:textAppearanceMedium"
+            style="@style/MovieDetailLabel"
             tools:text="overview" />
+
+        <TextView
+            android:id="@+id/movie_detail_trailer_label"
+            style="@style/MovieDetailLabel"
+            android:text="@string/movie_detail_label_see_trailer" />
+
+        <ImageButton
+            android:id="@+id/action_see_trailer"
+            android:layout_width="@dimen/trailer_image_button_width"
+            android:layout_height="@dimen/trailer_image_button_height"
+            android:layout_marginTop="@dimen/margin_small"
+            android:contentDescription="@string/content_description_action_see_trailer"
+            android:src="@android:drawable/ic_media_play" />
+
+        <TextView
+            android:id="@+id/movie_detail_review"
+            style="@style/MovieDetailLabel"
+            android:text="@string/movie_detail_label_review" />
+
     </LinearLayout>
 </layout>

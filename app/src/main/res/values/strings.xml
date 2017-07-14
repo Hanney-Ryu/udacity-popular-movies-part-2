@@ -1,17 +1,25 @@
 <resources>
     <string name="app_name">Popular Movie</string>
-    <string name="watchlist_title">Watchlist</string>
-    <string name="movie_list_title_popular">Popular</string>
-    <string name="movie_list_title_top_rated">Top Rated</string>
 
+    <!--activity movie list-->
     <string name="content_description_movie_poster">movie_poster</string>
     <string name="movie_list_not_connected">Not Connected</string>
     <string name="movie_list_no_results">No results</string>
 
+    <!--toolbar-->
     <string name="menu_filter_popular">Popular</string>
     <string name="menu_filter_top_rated">Top Rated</string>
     <string name="menu_filter_watchlist">Watchlist</string>
 
+    <string name="watchlist_title">Watchlist</string>
+    <string name="popular_title">Popular</string>
+    <string name="top_rated_title">Top Rated</string>
+
+    <!--activity movie detail -->
     <string name="movie_detail_add_watchlist">Watchlist</string>
     <string name="movie_detail_remove_watchlist">Added to watchlist</string>
+
+    <string name="movie_detail_label_see_trailer">Trailer</string>
+    <string name="movie_detail_label_review">Review</string>
+    <string name="content_description_action_see_trailer">see trailer</string>
 </resources>
